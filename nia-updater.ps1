@@ -57,6 +57,18 @@ param (
 # Pre Steps
 ###############################################################################
 
+## Check if run as adminstrator
+function Test-Administrator  
+{  
+    $user = [Security.Principal.WindowsIdentity]::GetCurrent();
+    (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)  
+}
+$administrator = Test-Administrator
+if($administrator -eq $true){Write-Output "Running As Admin"}else{
+    Write-Output "Not running as Admin, run this script elevated"
+    exit 0
+}
+
 ## If ran outside of NinjaRMM automation, will set to check and print driver info by default.
 ## With no logging to ninja and no updating
 
@@ -80,17 +92,10 @@ if (-not (Test-Path -Path $logfilelocation -PathType Container)) {
     # Create the folder and its parent folders if they don't exist
     New-Item -Path $logfilelocation -ItemType Directory -Force | Out-Null
 }
+$logfilelocation = "$logfilelocation\$logfilename"
 $Global:nl = [System.Environment]::NewLine
 $Global:ErrorCount = 0
 $global:Output = '' 
-# Set log file if not set already
-if (!($logfilelocation)) {
-    $logfilelocation = "C:\temp\Ninjarmm\logs\RMMLogs.log"
-}
-# Set log description if not set
-if (!($logdescription)) {
-    $logdescription = "Generic Log Start"
-}
 function Get-TimeStamp() {
   return (Get-Date).ToString("dd-MM-yyyy HH:mm:ss")
 }
@@ -114,17 +119,27 @@ function RMM-Initilize{
 RMM-Initilize
 
 function RMM-Msg{
-  param ($Message)
+  param (
+    $Message,
+    [ValidateSet('Verbose','Debug','Silent')]
+    [string]$messagetype = 'Silent'
+  )
   $global:Output += "$(Get-Timestamp) - Msg   : $Message"+$Global:nl
   Add-content $logfilelocation -value "$(Get-Timestamp) - Msg   : $message"
+  if($messagetype -eq 'Verbose'){Write-Output "$Message"}elseif($messagetype -eq 'Debug'){Write-Debug "$Message"}
 }
 
 #######
 function RMM-Error{
-  param ($Message)
+    param (
+    $Message,
+    [ValidateSet('Verbose','Debug','Silent')]
+    [string]$messagetype = 'Silent'
+  )
   $Global:ErrorCount += 1
   $global:Output += "$(Get-Timestamp) - Error : $Message"+$Global:nl
   Add-content $logfilelocation -value "$(Get-Timestamp) - Error : $message"
+  if($messagetype -eq 'Verbose'){Write-Warning "$Message"}elseif($messagetype -eq 'Debug'){Write-Debug "$Message"}
 }
 
 #######
@@ -136,13 +151,7 @@ function RMM-Exit{
   $global:Output += "$(Get-Timestamp) $Message"
   Add-content $logfilelocation -value "$(Get-Timestamp) - Exit  : $message Exit Code = $Exitcode"
   Add-content $logfilelocation -value "$(Get-Timestamp) -----------------------------Log End"
-  if ($enabletempinstallerlog) {
-  #Ninja-Property-Set tempinstallerlog $global:Output
-  }
-  Write-Host ""
-  Write-Host ""
-  Write-Host ""
-  Write-Host -Object "$global:Output"
+  Write-Output "Errors : $Global:ErrorCount"
   RMM-LogParse
   Exit $ExitCode
 }
@@ -153,24 +162,19 @@ function RMM-Exit{
 
 ## Write to screen what is being done
 if($drivers_check -eq $true){
-  Write-Output "Mode: `tChecking drivers"
-  RMM-Msg "Script Mode - Checking drivers"
+  RMM-Msg "Script Mode: `tChecking drivers" -messagetype Verbose
 }
 if($drivers_log -eq $true){
-  Write-Output "Mode: `tLogging details to NinjaRMM"
-  RMM-Msg "Script Mode - Logging details to NinjaRMM"
+  RMM-Msg "Script Mode: `tLogging details to NinjaRMM" -messagetype Verbose
 }
 if($update_nvidia -eq $true){
-  Write-Output "Mode: `tUpdating Nvidia drivers"
-  RMM-Msg "Script Mode - Updating Nvidia drivers"
+  RMM-Msg "Script Mode: `tUpdating Nvidia drivers" -messagetype Verbose
 }
 if($update_amd -eq $true){
-  Write-Output "Mode: `tUpdating AMD drivers"
-  RMM-Msg "Script Mode - Updating AMD drivers"
+  RMM-Msg "Script Mode: `tUpdating AMD drivers" -messagetype Verbose
 }
 if($update_intel -eq $true){
-  Write-Output "Mode: `tUpdating Intel drivers"
-  RMM-Msg "Script Mode - Updating Intel drivers"
+  RMM-Msg "Script Mode: `tUpdating Intel drivers" -messagetype Verbose
 }
 
 
@@ -190,32 +194,28 @@ function Get-DownloadUrls {
         $url = $urllist[$i]
 
         # Write the progress message with the part number
-        Write-Output "Downloading Part $($i + 1) of $totalUrls"
-        RMM-Msg "Downloading Part $($i + 1) of $totalUrls"
+        RMM-Msg "Downloading Part $($i + 1) of $totalUrls" -messagetype Verbose
         try {
             # Download the file using Start-BitsTransfer directly to the destination folder
             Start-BitsTransfer -Source $url -Destination $downloadLocation -Priority High -ErrorAction Stop
         } catch {
             # If an error occurs and the continueOnError switch is set, move on to the next URL
             if ($continueOnError) {
-                Write-Output "Error occurred while downloading: $($_.Exception.Message)"
-                RMM-Error "Error occurred while downloading: $($_.Exception.Message)"
-                Write-Output "$url"
+                RMM-Error "Error occurred while downloading: $($_.Exception.Message)" -messagetype Verbose
+                
                 $global:downloadError = $true
                 continue
             } else {
                 # If the continueOnError switch is not set, terminate the loop and function
                 Start-sleep -Seconds 5
-                Write-Output "Error occurred while downloading: $($_.Exception.Message)"
-                Write-Output "$url"
-                RMM-Error "Error occurred while downloading: $($_.Exception.Message)"
+                RMM-Error "Error occurred while downloading: $($_.Exception.Message)" -messagetype Verbose
+                RMM-Error "$url" -messagetype Verbose
                 $global:downloadError = $true
                 RMM-Exit "1"
             }
         }
     }
-    Write-Output "All files downloaded to $downloadlocation"
-    RMM-Msg "All files downloaded to $downloadlocation"
+    RMM-Msg "All files downloaded to $downloadlocation" -messagetype Verbose
     Start-sleep -Seconds 5
 }
 ###############################################################################
@@ -272,10 +272,8 @@ function Get-GPUInfo {
           }
         }
          # Output debugging information
-        Write-Host "GPU: $($gpu.Name)"
-        Write-Host "Matched Pattern: $($matchedPattern)"
         RMM-Msg "GPU: $($gpu.Name)"
-        RMM-Msg "Matched Pattern: $($matchedPattern)"
+        if($matchedPattern) {RMM-Msg "Matched Pattern: $($matchedPattern)" -messagetype Verbose}
          if ($gpuObject.IsIntegrated -eq $null) {
             $gpuObject.IsIntegrated = $false
             $gpuObject.IsDiscrete = $true
@@ -364,7 +362,7 @@ function Get-GPUInfo {
                 $driverrn_amd  = $hrefMatch.Groups[1].Value
                 
             } else {
-                Write-Host "No data found."
+                RMM-Error "No data found." -messagetype Verbose
             }                      
             $response2 = Invoke-RestMethod -Uri $driverrn_amd
             $pattern = 'https://drivers\.amd\.com/drivers/[^"]+'  # Regular expression pattern to match the URL
@@ -373,7 +371,7 @@ function Get-GPUInfo {
                 $driverLink_amd = $match.Value
                
             } else {
-                Write-Host "Download URL not found."
+                RMM-Error "Download URL not found." -messagetype Verbose
             }
             $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
             # Retrieve the subkeys from the specified registry path
@@ -430,8 +428,7 @@ function Get-GPUInfo {
             if ($content -match $versionPattern) {
                 $driverVersion = $Matches[1]
                 $latest_version_intel = $driverVersion
-                Write-Host "`t`t`tLatest Intel driver version Gen$generation`t$driverVersion"
-                RMM-Msg "Latest Intel driver : $latest_version_intel"
+                RMM-Msg "`t`t`tLatest Intel driver : $latest_version_intel" -messagetype Verbose
                 
             }
             return $driverLink_intel, $latest_version_intel
@@ -487,7 +484,7 @@ if ((Test-path HKLM:\SOFTWARE\7-Zip\) -and ([bool]((Get-itemproperty -Path "HKLM
     }    
 }
 else {
-    Write-Host "Sorry, but it looks like you don't have a supported archiver."
+    RMM-Msg "Sorry, but it looks like you don't have a supported archiver." -messagetype Verbose
     Write-Host ""
     # Download and silently install 7-zip if the user presses y
     $7zip = "https://www.7-zip.org/a/7z2301-x64.exe"
@@ -497,7 +494,7 @@ else {
     Start-Process "$folder\7Zip.exe" -Wait -ArgumentList "/S"
     # Delete the installer once it completes
     Remove-Item "$folder\7Zip.exe"
-    Write-Host "7zip Installed"
+    RMM-Msg "7zip Installed"  -messagetype Verbose
     $7zpath = Get-ItemProperty -path  HKLM:\SOFTWARE\7-Zip\ -Name Path
     $7zpath = $7zpath.Path
     $7zpathexe = $7zpath + "7z.exe"
@@ -526,8 +523,7 @@ function Set-DriverUpdatesNvidia {
 $gpuInfoNvidia = $gpuInfo | Where-Object { $_.Name -match "nvidia" }
 $extractinfo = Get-extract
 if ($gpuInfoNvidia.DriverUptoDate -eq $True){
-    Write-Output "Nvidia Drivers already upto date"
-    RMM-Msg "Nvidia Drivers already upto date"
+    RMM-Msg "Nvidia Drivers already upto date" -messagetype Verbose
     RMM-Exit 0
 }
 
@@ -548,7 +544,7 @@ Get-DownloadUrls -urllist $gpuInfoNvidia.DriverLink -downloadLocation $dlFile
 if ($extractinfo.'7zipinstalled') {
     Start-Process -FilePath $extractinfo.archiverProgram -NoNewWindow -ArgumentList "x -bso0 -bsp1 -bse1 -aoa $dlFile $filesToExtract -o""$extractFolder""" -wait
 }else {
-    RMM-Error "Something went wrong. No archive program detected. This should not happen."
+    RMM-Error "Something went wrong. No archive program detected. This should not happen." -messagetype Verbose
     RMM-Exit 1
 }
 
@@ -556,7 +552,7 @@ if ($extractinfo.'7zipinstalled') {
 (Get-Content "$extractFolder\setup.cfg") | Where-Object { $_ -notmatch 'name="\${{(EulaHtmlFile|FunctionalConsentFile|PrivacyPolicyFile)}}' } | Set-Content "$extractFolder\setup.cfg" -Encoding UTF8 -Force
 
 # Installing drivers
-RMM-Msg "Installing Nvidia drivers now..."
+RMM-Msg "Installing Nvidia drivers now..." -messagetype Verbose
 $install_args = "-passive -noreboot -noeula -nofinish -s"
 if ($clean) {
     $install_args = $install_args + " -clean"
@@ -564,12 +560,12 @@ if ($clean) {
 Start-Process -FilePath "$extractFolder\setup.exe" -ArgumentList $install_args -wait
 
 # Cleaning up downloaded files
-RMM-Msg "Deleting downloaded files"
+RMM-Msg "Deleting downloaded files" -messagetype Verbose
 Remove-Item $nvidiaTempFolder -Recurse -Force
 
 # Driver installed, requesting a reboot
-RMM-Msg "Driver installed. You may need to reboot to finish installation."
-RMM-Msg "Driver installed. $($gpuInfoNvidia.DriverLatest)"
+RMM-Msg "Driver installed. You may need to reboot to finish installation." -messagetype Verbose
+RMM-Msg "Driver installed. $($gpuInfoNvidia.DriverLatest)" -messagetype Verbose
 Set-GPUtoNinjaRMM
 }
 
@@ -582,7 +578,7 @@ Set-GPUtoNinjaRMM
 ###############################################################################
 
 function Set-DriverUpdatesamd {
-  RMM-Msg "Updating AMD Driver"
+  RMM-Msg "Updating AMD Driver" -messagetype Verbose
   $gpuInfoamd = $gpuInfo | Where-Object { $_.Name -match "amd" }
   $extractinfo = Get-extract
   if ($gpuInfoamd.DriverUptoDate -eq $True){
@@ -593,11 +589,11 @@ function Set-DriverUpdatesamd {
   $amdurl = $gpuInfoamd.DriverLink
   Invoke-WebRequest -Uri $amdurl -Headers @{'Referer' = 'https://www.amd.com/en/support'} -Outfile C:\temp\ninjarmm\$amdversion.exe -usebasicparsing
   # Installing drivers
-  RMM-Msg "Installing AMD drivers now..."
+  RMM-Msg "Installing AMD drivers now..." -messagetype Verbose
   $install_args = "-install"
   Start-Process -FilePath "C:\temp\ninjarmm\$amdversion.exe" -ArgumentList $install_args -wait
-  RMM-Msg "Driver installed. You may need to reboot to finish installation."
-  RMM-Msg "Driver installed. $amdversion"
+  RMM-Msg "Driver installed. You may need to reboot to finish installation." -messagetype Verbose
+  RMM-Msg "Driver installed. $amdversion" -messagetype Verbose
   Set-GPUtoNinjaRMM
 }
 
@@ -609,11 +605,11 @@ function Set-DriverUpdatesamd {
 # Function - Intel Driver Installer
 ###############################################################################
 function Set-DriverUpdatesintel{
-  RMM-Msg "Updating Intel Driver"
+  RMM-Msg "Updating Intel Driver" -messagetype Verbose
   $gpuInfointel = $gpuInfo | Where-Object { $_.Name -match "intel" }
   $extractinfo = Get-extract
   if ($gpuInfointel.DriverUptoDate -eq $True){
-    RMM-Msg "Intel Drivers already upto date"
+    RMM-Msg "Intel Drivers already upto date" -messagetype Verbose
     RMM-Exit 0
   }
   $intelversion = $gpuInfointel.DriverLatest
@@ -627,16 +623,16 @@ function Set-DriverUpdatesintel{
   if ($extractinfo.'7zipinstalled') {
     Start-Process -FilePath $extractinfo.archiverProgram -NoNewWindow -ArgumentList "x -bso0 -bsp1 -bse1 -aoa $inteldriverfile -o""$extractFolder""" -wait
 }else {
-    RMM-Error "Something went wrong. No archive program detected. This should not happen."
+    RMM-Error "Something went wrong. No archive program detected. This should not happen." -messagetype Verbose
     RMM-Exit 1
 }
 
   # Installing drivers
-  RMM-Msg "Installing Intel drivers now..."
+  RMM-Msg "Installing Intel drivers now..." -messagetype Verbose
   $install_args = "--silent"
   Start-Process -FilePath "$extractFolder\installer.exe" -ArgumentList $install_args -wait
-  RMM-Msg "Driver installed. You may need to reboot to finish installation."
-  RMM-Msg "Driver installed. $intelversion"
+  RMM-Msg "Driver installed. You may need to reboot to finish installation." -messagetype Verbose
+  RMM-Msg "Driver installed. $intelversion" -messagetype Verbose
   Set-GPUtoNinjaRMM
 }
 ###############################################################################
@@ -648,7 +644,7 @@ function Set-DriverUpdatesintel{
 ###############################################################################
 
 function Set-GPUtoNinjaRMM {
-    RMM-Msg "Writing Details to NinjaRMM custom fields"
+    RMM-Msg "Writing Details to NinjaRMM custom fields" -messagetype Verbose
     foreach ($gpu in $gpuInfo) {
         if ($gpu.IsDiscrete){
             $discreteGPUFound = $true
