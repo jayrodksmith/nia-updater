@@ -6,7 +6,7 @@ function Set-DriverUpdatesNvidia {
     [switch]$clean = $false, # Will delete old drivers and install the new ones
     [string]$folder = "C:\Temp"   # Downloads and extracts the driver here
 )
-
+RMM-Msg "Script Mode: `tUpdating NVIDIA drivers" -messagetype Verbose
 $gpuInfoNvidia = $gpuInfo | Where-Object { $_.Name -match "nvidia" }
 $extractinfo = Get-extract
 if ($gpuInfoNvidia.DriverUptoDate -eq $True){

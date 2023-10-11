@@ -3,6 +3,7 @@
 ###############################################################################
 function Get-GPUInfo {
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+    RMM-Msg "Script Mode: `tChecking GPU Information" -messagetype Verbose
     $cim_os = Get-CimInstance -ClassName win32_operatingsystem | select Caption 
     $cim_cpu = Get-CimInstance -ClassName Win32_Processor
     $cim_gpu = Get-CimInstance -ClassName Win32_VideoController | Where-Object { $_.Name -match "NVIDIA|AMD|Intel" }

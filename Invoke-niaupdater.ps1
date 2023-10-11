@@ -145,7 +145,6 @@ RMM-Initilize
 # Main Script Starts Here
 ###############################################################################
 # Get GPU Info and print to screen
-RMM-Msg "Script Mode: `tChecking drivers" -messagetype Verbose
 $gpuInfo = Get-GPUInfo
 $Script:gpuInfo = $gpuInfo
 $gpuInfo
