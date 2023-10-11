@@ -124,7 +124,7 @@ if(($niaupdaterinstalled -eq $false) -or ($uptodate -eq $false -and $autoupdate 
     if (-not (Test-Path -Path ('{0}\Invoke-niaupdater.ps1' -f $niaupdaterPath))) {
         throw 'Unable to find the Invoke-niaupdater.ps1 file. Please check the installation.'
     }
-    Write-Output "niaupdater updated to version : $updatedversion"    
+    Write-Output "niaupdater updated to version : $niaupdaterlatestversion"    
 }else{
 if($autoupdate -eq $true){Write-Output "niaupdater already latest version : $niaupdaterlatestversion"}else{
     Write-Output "niaupdater already installed" 

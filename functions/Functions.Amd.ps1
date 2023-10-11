@@ -8,7 +8,8 @@ function Set-DriverUpdatesamd {
     $extractinfo = Get-extract
     if ($gpuInfoamd.DriverUptoDate -eq $True){
       RMM-Msg "AMD Drivers already upto date"
-      return "uptodate"
+      $Script:installstatus = "uptodate"
+      return
     }
     $amdversion = $gpuInfoamd.DriverLatest
     $amdurl = $gpuInfoamd.DriverLink
@@ -19,7 +20,8 @@ function Set-DriverUpdatesamd {
     Start-Process -FilePath "C:\temp\ninjarmm\$amdversion.exe" -ArgumentList $install_args -wait
     RMM-Msg "Driver installed. You may need to reboot to finish installation." -messagetype Verbose
     RMM-Msg "Driver installed. $amdversion" -messagetype Verbose
-    return "Updated"
+    $Script:installstatus = "Updated"
+    return
   }
   
   ###############################################################################

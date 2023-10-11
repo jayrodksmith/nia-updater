@@ -11,7 +11,8 @@ $gpuInfoNvidia = $gpuInfo | Where-Object { $_.Name -match "nvidia" }
 $extractinfo = Get-extract
 if ($gpuInfoNvidia.DriverUptoDate -eq $True){
     RMM-Msg "Nvidia Drivers already upto date" -messagetype Verbose
-    return "uptodate"
+    $Script:installstatus = "uptodate"
+    return
 }
 
 # Temp folder
@@ -53,7 +54,8 @@ Remove-Item $nvidiaTempFolder -Recurse -Force
 # Driver installed, requesting a reboot
 RMM-Msg "Driver installed. You may need to reboot to finish installation." -messagetype Verbose
 RMM-Msg "Driver installed. $($gpuInfoNvidia.DriverLatest)" -messagetype Verbose
-return "Updated"
+$Script:installstatus = "Updated"
+return
 }
 
 ###############################################################################

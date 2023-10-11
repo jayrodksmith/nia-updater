@@ -37,6 +37,7 @@ Ninja-Property-Set hardwareintegrateddriveruptodate clear
 if (-not $discreteGPUFound) {
 Ninja-Property-Set hardwarediscretegpu "Not Detected"
 }
+return
 }
 
 ###############################################################################
