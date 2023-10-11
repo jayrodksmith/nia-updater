@@ -76,7 +76,7 @@ $Script:logdescription = "niaupdater"
 ###############################################################################
 # NIA Installer
 ###############################################################################
-$niaupdaterRepo = 'https://github.com/$githubrepo'
+$niaupdaterRepo = "https://github.com/$githubrepo"
 $releases = "https://api.github.com/repos/$githubrepo/releases"
 $niaupdaterlatestversion = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name
 $niaupdaterinstalledversion = Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\Software\niaupdater' -erroraction silentlycontinue | Select-Object -ExpandProperty Version
