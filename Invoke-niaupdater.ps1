@@ -155,16 +155,16 @@ if($RMMPlatform -eq "NinjaOne"){
 }
 # Cycle through updating drivers if required
 if($update_amd -eq $true){ 
-    $installstatus = Set-DriverUpdatesamd  
+    Set-DriverUpdatesamd  
 }
 if($update_nvidia -eq $true){
-    $installstatus = Set-DriverUpdatesNvidia
+    Set-DriverUpdatesNvidia
 }
 if($update_intel -eq $true){
-    $installstatus = Set-DriverUpdatesintel 
+    Set-DriverUpdatesintel 
 }
 # Restart machine if required
-if($restartAfterUpdating -eq $true -and $installstatus -eq "Updated"){
+if($restartAfterUpdating -eq $true -and $Script:installstatus -eq "Updated"){
     shutdown /r /t 30 /c "In 30 seconds, the computer will be restarted to finish installing GPU Drivers"
 }
 RMM-Exit 0
