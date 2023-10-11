@@ -37,7 +37,7 @@ param (
         [string]$update_intel = $env:updateintelDrivers,
         [string]$restartAfterUpdating = $env:restartAfterUpdating,
         [ValidateSet('NinjaOne', 'Standalone')]
-        [string]$RMMPlatform = "NinjaOne",
+        [string]$RMMPlatform = "Standalone",
         # Currently not implemented
         [bool]$notifications = $false,
         [bool]$autoupdate = $false
@@ -137,7 +137,7 @@ foreach ($Function in $Functions) {
     Write-Verbose ('Importing function file: {0}' -f $Function.FullName)
     . $Function.FullName
 }
-
+RMM-Initilize
 ###############################################################################
 # Main Script Starts Here
 ###############################################################################
