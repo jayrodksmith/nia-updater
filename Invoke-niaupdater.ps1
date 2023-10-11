@@ -147,7 +147,7 @@ RMM-Initilize
 # Get GPU Info and print to screen
 $gpuInfo = Get-GPUInfo
 $Script:gpuInfo = $gpuInfo
-$gpuInfo
+
 # Send GPU Info to RMM
 if($RMMPlatform -eq "NinjaOne"){
    Set-GPUtoNinjaRMM
@@ -162,6 +162,7 @@ if($update_nvidia -eq $true){
 if($update_intel -eq $true){
     Set-DriverUpdatesintel 
 }
+$gpuInfo
 # Restart machine if required
 if($restartAfterUpdating -eq $true -and $Script:installstatus -eq "Updated"){
     shutdown /r /t 30 /c "In 30 seconds, the computer will be restarted to finish installing GPU Drivers"
