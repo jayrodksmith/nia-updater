@@ -84,7 +84,7 @@ $niaupdaterTempExtractionPath = (Join-Path -Path $ENV:Temp -ChildPath "niaupdate
 $uptodate = if($niaupdaterlatestversion -eq $niaupdaterinstalledversion){$true}else{$false}
 
 # Check if installed
-if (-not (Test-Path -Path ('{0}\nia-updater.ps1' -f $niaupdaterPath))) {
+if (-not (Test-Path -Path ('{0}\Invoke-niaupdater.ps1' -f $niaupdaterPath))) {
     $niaupdaterinstalled = $false
 }else {$niaupdaterinstalled = $true}
 
@@ -118,8 +118,8 @@ if(($niaupdaterinstalled -eq $false) -or ($uptodate -eq $false -and $autoupdate 
     Remove-Item -Path $niaupdaterTempExtractionPath -Force -Recurse
 
     # Confirm that we have the `nia-updater.ps1` file
-    if (-not (Test-Path -Path ('{0}\nia-updater.ps1' -f $niaupdaterPath))) {
-        throw 'Unable to find the nia-updater.ps1 file. Please check the installation.'
+    if (-not (Test-Path -Path ('{0}\Invoke-niaupdater.ps1' -f $niaupdaterPath))) {
+        throw 'Unable to find the Invoke-niaupdater.ps1 file. Please check the installation.'
     }
     Write-Output "niaupdater updated to version : $updatedversion"    
 }else{
