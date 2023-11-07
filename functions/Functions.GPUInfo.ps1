@@ -123,29 +123,30 @@ function Get-GPUInfo {
       ## AMD SECTION ##      
       $exists_amd = $gpuInfo | Where-Object { $_.Name -match "amd" }
       if($exists_amd){
-            $amddriverdetails = "https://gpuopen.com/version-table/"
+            $amddriverdetails = "https://videocardz.com/sections/drivers"
             $response = Invoke-WebRequest -Uri $amddriverdetails -UseBasicParsing
-            # Define the regular expression patterns to match the data-content attribute and href attribute
-            $dataContentPattern = 'data-content=''([\d\.]+)'''
-            $hrefPattern = 'href=''(https://www.amd.com[^'']+)'''
-            # Find matches for both patterns in the HTML content
-            $dataContentMatch = [regex]::Match($response, $dataContentPattern)
-            $hrefMatch = [regex]::Match($response, $hrefPattern)
-              # Check if matches were found
-            if ($dataContentMatch.Success -and $hrefMatch.Success) {
+            $matches = [regex]::Matches($response, 'href="([^"]*https://videocardz.com/driver/amd-radeon-software-adrenalin[^"]*)"')
+            $link = $matches.Groups[1].Value
+            $response = Invoke-WebRequest -Uri $link -UseBasicParsing
+            $latestversion = [regex]::Match($response, "Download AMD Radeon Software Adrenalin (\d+\.\d+\.\d+)").Groups[1].Value
+            $matches = [regex]::Matches($response, 'href="([^"]*https://www.amd.com/en/support/kb/release-notes[^"]*)"')
+            $link = $matches.Groups[1].Value
+            $response = Invoke-RestMethod -Uri $link
+            $matches = [regex]::Matches($response, 'href="([^"]*https://drivers.amd.com/drivers/whql-amd-software-[^"]*)"')
+            $link = $matches.Groups[1].Value
+            
+            # Check if matches were found
+            if ($link.Success -and $latestversion.Success) {
                 # Extract the desired values from the matches
-                $latest_version_amd = $dataContentMatch.Groups[1].Value
+                $latest_version_amd = $latestversion
                 RMM-Msg "Latest AMD driver : $latest_version_amd"
-                $driverrn_amd  = $hrefMatch.Groups[1].Value
+                $driverrn_amd  = $link
                 
             } else {
-                RMM-Error "No data found." -messagetype Verbose
+                RMM-Error "No Version found." -messagetype Verbose
             }                      
-            $response2 = Invoke-RestMethod -Uri $driverrn_amd
-            $pattern = 'https://drivers\.amd\.com/drivers/[^"]+'  # Regular expression pattern to match the URL
-            $match = [regex]::Match($response2, $pattern)
-            if ($match.Success) {
-                $driverLink_amd = $match.Value
+            if ($link.Success) {
+                $driverLink_amd = $link
                
             } else {
                 RMM-Error "Download URL not found." -messagetype Verbose
