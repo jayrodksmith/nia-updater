@@ -133,20 +133,18 @@ function Get-GPUInfo {
             $link = $matches.Groups[1].Value
             $response = Invoke-RestMethod -Uri $link
             $matches = [regex]::Matches($response, 'href="([^"]*https://drivers.amd.com/drivers/whql-amd-software-[^"]*)"')
-            $link = $matches.Groups[1].Value
+            $driverlink = $matches.Groups[1].Value
             
             # Check if matches were found
-            if ($link.Success -and $latestversion.Success) {
+            if ($latestversion) {
                 # Extract the desired values from the matches
                 $latest_version_amd = $latestversion
-                RMM-Msg "Latest AMD driver : $latest_version_amd"
-                $driverrn_amd  = $link
-                
+                RMM-Msg "Latest AMD driver : $latest_version_amd" 
             } else {
                 RMM-Error "No Version found." -messagetype Verbose
             }                      
-            if ($link.Success) {
-                $driverLink_amd = $link
+            if ($driverlink) {
+                $driverLink_amd = $driverlink
                
             } else {
                 RMM-Error "Download URL not found." -messagetype Verbose
