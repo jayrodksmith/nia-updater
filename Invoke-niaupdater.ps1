@@ -39,8 +39,8 @@ param (
         [ValidateSet('NinjaOne', 'Standalone')]
         [string]$RMMPlatform = "Standalone",
         # Currently not implemented
-        [bool]$notifications = $false,
-        [bool]$autoupdate = $false
+        [bool]$notifications = $true,
+        [bool]$autoupdate = $true
         )
 ###############################################################################
 # Pre Checks
@@ -173,3 +173,9 @@ RMM-Exit 0
 ###############################################################################
 # Main Script Ends Here
 ###############################################################################
+
+<## Example
+$Toastenable = $true
+Set-Toast -Toasttitle "Driver Update" -Toasttext "Finished installing nvidia drivers please reboot" -UniqueIdentifier "default" -Toastreboot -Toastenable $notifications
+Set-Toast -Toasttitle "Driver Update" -Toasttext "Finished installing nvidia drivers please reboot" -UniqueIdentifier "default" -Toastenable $notifications
+##>

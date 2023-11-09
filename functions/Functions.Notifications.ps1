@@ -1,9 +1,3 @@
-## Example
-$Toastenable = $true
-Set-Toast -Toasttitle "Driver Update" -Toasttext "Finished installing nvidia drivers please reboot" -UniqueIdentifier "default" -Toastreboot -Toastenable $Toastenable
-Set-Toast -Toasttitle "Driver Update" -Toasttext "Finished installing nvidia drivers please reboot" -UniqueIdentifier "default"
-## Example End
-
 ## Check if toast installed
 if(-not (Get-Module BurntToast -ListAvailable)){
     Install-Module BurntToast -Force
@@ -30,8 +24,49 @@ if (!$ProtocolHandler) {
     New-item 'HKCR:\ToastReboot\Shell\Open\command' -force
     set-itemproperty 'HKCR:\ToastReboot\Shell\Open\command' -name '(DEFAULT)' -value 'C:\Windows\System32\shutdown.exe -r -t 00' -force
 }
-
+## Toast Notification Icons
+Function Register-NotificationApp {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true)]$AppID,
+        [Parameter(Mandatory=$true)]$AppDisplayName,
+        [Parameter(Mandatory=$false)]$AppIconUri,
+        [Parameter(Mandatory=$false)][int]$ShowInSettings = 0
+    )
+    $HKCR = Get-PSDrive -Name HKCR -ErrorAction SilentlyContinue
+    If (!($HKCR))
+    {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT -Scope Script
+    }
+    $AppRegPath = "HKCR:\AppUserModelId"
+    $RegPath = "$AppRegPath\$AppID"
+    If (!(Test-Path $RegPath))
+    {
+        $null = New-Item -Path $AppRegPath -Name $AppID -Force
+    }
+    $DisplayName = Get-ItemProperty -Path $RegPath -Name DisplayName -ErrorAction SilentlyContinue | Select -ExpandProperty DisplayName -ErrorAction SilentlyContinue
+    If ($DisplayName -ne $AppDisplayName)
+    {
+        $null = New-ItemProperty -Path $RegPath -Name DisplayName -Value $AppDisplayName -PropertyType String -Force
+    }
+    $IconUri = Get-ItemProperty -Path $RegPath -Name IconUri -ErrorAction SilentlyContinue | Select -ExpandProperty IconUri -ErrorAction SilentlyContinue
+    If ($IconUri -ne $AppIconUri)
+    {
+        $null = New-ItemProperty -Path $RegPath -Name IconUri -Value $AppIconUri -PropertyType String -Force
+    }
+    $ShowInSettingsValue = Get-ItemProperty -Path $RegPath -Name ShowInSettings -ErrorAction SilentlyContinue | Select -ExpandProperty ShowInSettings -ErrorAction SilentlyContinue
+    If ($ShowInSettingsValue -ne $ShowInSettings)
+    {
+        $null = New-ItemProperty -Path $RegPath -Name ShowInSettings -Value $ShowInSettings -PropertyType DWORD -Force
+    }
+    Remove-PSDrive -Name HKCR -Force
+}
+$AppID = "NIAUpdater.Notification"
+$AppDisplayName = "NIA Updater"
+$AppIconUri = "C:\ProgramData\niaupdater\resources\logos\logo_ninjarmm_square.png"
+Register-NotificationApp -AppID $AppID -AppDisplayName $AppDisplayName -AppIconUri $AppIconUri
 ## Main Toast Function
+
 function Set-Toast{
     param (
     [string]$Toastenable = $true,
@@ -42,6 +77,7 @@ function Set-Toast{
     [switch]$Toastreboot = $false
     )
     if($Toastenable -eq $false){return}
+    New-BTAppId -AppId "NIAUpdater.Notification"
     if($Toastreboot){
             $scriptblock = {
                 $logoimage = New-BTImage -Source $Toastlogo -AppLogoOverride -Crop Default
@@ -59,7 +95,7 @@ function Set-Toast{
                 $Binding = New-BTBinding -Children $text1, $text2 -AppLogoOverride $logoimage
                 $Visual = New-BTVisual -BindingGeneric $Binding
                 $Content = New-BTContent -Visual $Visual -Actions $action
-                Submit-BTNotification -Content $Content -UniqueIdentifier $UniqueIdentifier
+                Submit-BTNotification -Content $Content -UniqueIdentifier $UniqueIdentifier -AppId "NIAUpdater.Notification"
         }
         }else{
             $scriptblock = {
@@ -71,7 +107,7 @@ function Set-Toast{
                 $Binding = New-BTBinding -Children $text1, $text2 -AppLogoOverride $logoimage
                 $Visual = New-BTVisual -BindingGeneric $Binding
                 $Content = New-BTContent -Visual $Visual -Actions $action
-                Submit-BTNotification -Content $Content -UniqueIdentifier $UniqueIdentifier 
+                Submit-BTNotification -Content $Content -UniqueIdentifier $UniqueIdentifier -AppId "NIAUpdater.Notification"
         }
     }
     if(($currentuser = whoami) -eq 'nt authority\system'){
