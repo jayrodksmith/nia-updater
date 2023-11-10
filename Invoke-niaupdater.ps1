@@ -39,8 +39,8 @@ param (
         [ValidateSet('NinjaOne', 'Standalone')]
         [string]$RMMPlatform = "Standalone",
         # Currently not implemented
-        [bool]$notifications = $false,
-        [bool]$autoupdate = $false
+        [bool]$notifications = $true,
+        [bool]$autoupdate = $true
         )
 ###############################################################################
 # Pre Checks
@@ -86,7 +86,9 @@ $uptodate = if($niaupdaterlatestversion -eq $niaupdaterinstalledversion){$true}e
 # Check if installed
 if (-not (Test-Path -Path ('{0}\Invoke-niaupdater.ps1' -f $niaupdaterPath))) {
     $niaupdaterinstalled = $false
-}else {$niaupdaterinstalled = $true}
+    }else {
+    $niaupdaterinstalled = $true
+}
 
 # Download and install if not exist
 if(($niaupdaterinstalled -eq $false) -or ($uptodate -eq $false -and $autoupdate -eq $true)){
@@ -125,11 +127,10 @@ if(($niaupdaterinstalled -eq $false) -or ($uptodate -eq $false -and $autoupdate 
         throw 'Unable to find the Invoke-niaupdater.ps1 file. Please check the installation.'
     }
     Write-Output "niaupdater updated to version : $niaupdaterlatestversion"    
-}else{
-if($autoupdate -eq $true){Write-Output "niaupdater already latest version : $niaupdaterlatestversion"}else{
+    }else{
+    if($autoupdate -eq $true){Write-Output "niaupdater already latest version : $niaupdaterlatestversion"}else{
     Write-Output "niaupdater already installed" 
-}
-
+    }
 }
 ###############################################################################
 # Import Functions as required
@@ -150,7 +151,7 @@ $Script:gpuInfo = $gpuInfo
 
 # Send GPU Info to RMM
 if($RMMPlatform -eq "NinjaOne"){
-   Set-GPUtoNinjaRMM
+    Set-GPUtoNinjaRMM
 }
 # Cycle through updating drivers if required
 if($update_amd -eq $true){ 
@@ -172,3 +173,9 @@ RMM-Exit 0
 ###############################################################################
 # Main Script Ends Here
 ###############################################################################
+
+<## Example
+$Toastenable = $true
+Set-Toast -Toasttitle "Driver Update" -Toasttext "Finished installing nvidia drivers please reboot" -UniqueIdentifier "default" -Toastreboot -Toastenable $notifications
+Set-Toast -Toasttitle "Driver Update" -Toasttext "Finished installing nvidia drivers please reboot" -UniqueIdentifier "default" -Toastenable $notifications
+##>
