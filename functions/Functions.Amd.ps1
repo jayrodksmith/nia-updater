@@ -4,6 +4,7 @@
 
 function Set-DriverUpdatesamd {
     RMM-Msg "Script Mode: `tUpdating AMD drivers" -messagetype Verbose
+    Set-Toast -Toasttitle "Updating Drivers" -Toasttext "Updating AMD Drivers" -UniqueIdentifier "default" -Toastenable $notifications
     $gpuInfoamd = $gpuInfo | Where-Object { $_.Name -match "amd" }
     $extractinfo = Get-extract
     if ($gpuInfoamd.DriverUptoDate -eq $True){
@@ -20,6 +21,7 @@ function Set-DriverUpdatesamd {
     Start-Process -FilePath "C:\temp\ninjarmm\$amdversion.exe" -ArgumentList $install_args -wait
     RMM-Msg "Driver installed. You may need to reboot to finish installation." -messagetype Verbose
     RMM-Msg "Driver installed. $amdversion" -messagetype Verbose
+    Set-Toast -Toasttitle "Updating Drivers" -Toasttext "$amdversion AMD Drivers Installed" -UniqueIdentifier "default" -Toastenable $notifications
     $Script:installstatus = "Updated"
     return
 } 
@@ -35,16 +37,19 @@ function Get-driverlatestversionamd {
     [string]$amddriverdetails = "https://videocardz.com/sections/drivers" # URL to check for driver details
   )
   $response = Invoke-WebRequest -Uri $amddriverdetails -UseBasicParsing
+  RMM-Msg "Checking $amddriverdetails for driver details" 
   $matches = [regex]::Matches($response, 'href="([^"]*https://videocardz.com/driver/amd-radeon-software-adrenalin[^"]*)"')
   $link = $matches.Groups[1].Value
+  RMM-Msg "Checking $link for latest driver details" 
   $response = Invoke-WebRequest -Uri $link -UseBasicParsing
   $latestversion = [regex]::Match($response, "Download AMD Radeon Software Adrenalin (\d+\.\d+\.\d+)").Groups[1].Value
   $matches = [regex]::Matches($response, 'href="([^"]*https://www.amd.com/en/support/kb/release-notes[^"]*)"')
   $link = $matches.Groups[1].Value
+  RMM-Msg "Checking $link for latest driver download url"
+  Start-Sleep -Seconds 10
   $response = Invoke-RestMethod -Uri $link
   $matches = [regex]::Matches($response, 'href="([^"]*https://drivers.amd.com/drivers/whql-amd-software-[^"]*)"')
   $driverlink = $matches.Groups[1].Value
-
   # Check if matches were found
   if ($latestversion) {
       # Extract the desired values from the matches

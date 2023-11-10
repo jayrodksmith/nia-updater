@@ -7,6 +7,7 @@ function Set-DriverUpdatesNvidia {
     [string]$folder = "C:\Temp"   # Downloads and extracts the driver here
     )
     RMM-Msg "Script Mode: `tUpdating NVIDIA drivers" -messagetype Verbose
+    Set-Toast -Toasttitle "Updating Drivers" -Toasttext "Updating Nvidia Drivers" -UniqueIdentifier "default" -Toastenable $notifications
     $gpuInfoNvidia = $gpuInfo | Where-Object { $_.Name -match "nvidia" }
     $extractinfo = Get-extract
     if ($gpuInfoNvidia.DriverUptoDate -eq $True){
@@ -54,6 +55,7 @@ function Set-DriverUpdatesNvidia {
     # Driver installed, requesting a reboot
     RMM-Msg "Driver installed. You may need to reboot to finish installation." -messagetype Verbose
     RMM-Msg "Driver installed. $($gpuInfoNvidia.DriverLatest)" -messagetype Verbose
+    Set-Toast -Toasttitle "Updating Drivers" -Toasttext "$($gpuInfoNvidia.DriverLatest) Nvidia Drivers Installed" -UniqueIdentifier "default" -Toastenable $notifications
     $Script:installstatus = "Updated"
     return
 }

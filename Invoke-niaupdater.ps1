@@ -155,19 +155,35 @@ if($RMMPlatform -eq "NinjaOne"){
 }
 # Cycle through updating drivers if required
 if($update_amd -eq $true){ 
-    Set-DriverUpdatesamd  
+    Set-DriverUpdatesamd
+    if($Script:installstatus -ne "Updated"){
+        Set-Toast -Toasttitle "Driver Check" -Toasttext "No new AMD drivers found" -UniqueIdentifier "nonew" -Toastenable $notifications
+    }
 }
 if($update_nvidia -eq $true){
     Set-DriverUpdatesNvidia
+    if($Script:installstatus -ne "Updated"){
+        Set-Toast -Toasttitle "Driver Check" -Toasttext "No new Nvidia drivers found" -UniqueIdentifier "nonew" -Toastenable $notifications
+    }
 }
 if($update_intel -eq $true){
-    Set-DriverUpdatesintel 
+    Set-DriverUpdatesintel
+    if($Script:installstatus -ne "Updated"){
+        Set-Toast -Toasttitle "Driver Check" -Toasttext "No new Intel drivers found" -UniqueIdentifier "nonew" -Toastenable $notifications
+    } 
 }
 $gpuInfo
 # Restart machine if required
 if($restartAfterUpdating -eq $true -and $Script:installstatus -eq "Updated"){
     shutdown /r /t 30 /c "In 30 seconds, the computer will be restarted to finish installing GPU Drivers"
+    RMM-Exit 0
 }
+
+if($restartAfterUpdating -eq $false -and $Script:installstatus -eq "Updated"){
+    Set-Toast -Toasttitle "Updating Drivers" -Toasttext "Finished installing drivers please reboot" -UniqueIdentifier "default" -Toastreboot -Toastenable $notifications
+    RMM-Exit 0
+}
+
 RMM-Exit 0
 
 ###############################################################################

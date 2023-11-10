@@ -4,7 +4,7 @@
 function Get-GPUInfo {
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
     RMM-Msg "Script Mode: `tChecking GPU Information" -messagetype Verbose
-    Set-Toast -Toasttitle "Driver Check" -Toasttext "Checking for GPU driver updates" -UniqueIdentifier "default" -Toastenable $notifications
+    Set-Toast -Toasttitle "Driver Check" -Toasttext "Checking for GPU drivers" -UniqueIdentifier "default" -Toastenable $notifications
     $cim_os = Get-CimInstance -ClassName win32_operatingsystem | select Caption 
     $cim_cpu = Get-CimInstance -ClassName Win32_Processor
     $cim_gpu = Get-CimInstance -ClassName Win32_VideoController | Where-Object { $_.Name -match "NVIDIA|AMD|Intel" }
@@ -140,7 +140,7 @@ function Get-GPUInfo {
             }
         }
     }
-    Set-Toast -Toasttitle "Driver Check" -Toasttext "Finshed Checking for GPU driver updates" -UniqueIdentifier "default" -Toastenable $notifications
+    Set-Toast -Toasttitle "Driver Check" -Toasttext "Finished Checking for GPU drivers" -UniqueIdentifier "default" -Toastenable $notifications
     return $gpuInfo
 }
 ###############################################################################
