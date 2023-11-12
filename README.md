@@ -37,6 +37,7 @@ Script has been designed to run as "System Context"
 Can be run as Administrator however advised to run as system context
 
 NinjaRMM Script Variable Requirements
+            
             updateNvidiaDrivers                 (Script Variable Checkbox)
             updateamdDrivers                    (Script Variable Checkbox)
             updateintelDrivers                  (Script Variable Checkbox)
@@ -45,6 +46,7 @@ NinjaRMM Script Variable Requirements
             autoupdate                          (Script Variable Checkbox)
 
 NinjaRMM Custom Field Requirements inlcuding permissions
+            
             Permissions for all fields
                 Technician                      Read Only
                 Automations                     Read Write
