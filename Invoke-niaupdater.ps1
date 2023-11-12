@@ -1,34 +1,4 @@
 <#
-Set-DriverUpdatesNvidia
-    Used to install nvidia drivers
-    ( Should be fairly robust)
-
-Set-DriverUpdatesamd
-    Used to install amd drivers
-    ( Currently working , but needs more testing)
-
-Set-DriverUpdatesIntel
-    Used to install intel drivers
-    ( Currently working for Intel Gen 11 +)
-
-Set-GPUtoNinjaRMM 
-    Used to log details to NinjaRMM
-        All NinjaRMM custom fields below
-            hardwarediscretegpu                 (text)
-            hardwarediscretedriverinstalled     (text)
-            hardwarediscretedriverlatest        (text)
-            hardwarediscretedriveruptodate      (checkbox)
-        
-            hardwareintegratedgpu               (text)
-            hardwareintegrateddriverinstalled   (text)
-            hardwareintegrateddriverlatest      (text)
-            hardwareintegrateddriveruptodate    (checkbox)
-
-NinjaRMM requirements -----------------
-            updateNvidiaDrivers                 (Script Variable Checkbox)
-            updateamdDrivers                    (Script Variable Checkbox)
-            updateintelDrivers                  (Script Variable Checkbox)
-            restartAfterUpdating                (Script Variable Checkbox)(Default unticked)
 #>
 param (
         [string]$githubrepo = "jayrodksmith/nia-updater",
@@ -37,7 +7,7 @@ param (
         [string]$update_intel = $env:updateintelDrivers,
         [string]$restartAfterUpdating = $env:restartAfterUpdating,
         [ValidateSet('NinjaOne', 'Standalone')]
-        [string]$RMMPlatform = "Standalone",
+        [string]$RMMPlatform = "NinjaOne",
         # Currently not implemented
         [bool]$notifications = $true,
         [bool]$autoupdate = $true
@@ -50,14 +20,22 @@ function Test-Administrator {
     (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)  
 }
 if(Test-Administrator -eq $true){
-    Write-Debug "Running As Admin"}
+    Write-Debug "niaupdater running as admin"}
     else{
-    Write-Warning "Not running as Admin, run this script elevated or as System Context"
+    Write-Warning "NIAupdater not running as Admin, run this script elevated or as System Context"
     exit 0
 }
+
 # If ran outside of NinjaRMM automation, will set to check and print driver info by default.
 # With no logging to ninja and no updating
 
+# Check if ninjarmm exists if rmmplatform set
+$ninjarmmcli = "C:\ProgramData\NinjaRMMAgent\ninjarmm-cli.exe"
+$ninjarmminstalled = (Test-Path -Path $ninjarmmcli)
+if($RMMPlatform -eq "NinjaOne" -and $ninjarmminstalled -eq $false){
+    Write-Warning "NinjaOne not installed, defaulting to Standalone"
+    $RMMPlatform = 'Standalone'
+}
 if(!$update_nvidia){$update_nvidia = $false}
 if(!$update_amd) {$update_amd = $false}
 if(!$update_intel) {$update_intel = $false}
@@ -71,7 +49,6 @@ $Script:niaupdaterPath = (Join-Path -Path $ENV:ProgramData -ChildPath "niaupdate
 $Script:logfilelocation = "$niaupdaterPath\logs"
 $Script:logfile = "$Script:logfilelocation\niaupdater.log"
 $Script:logdescription = "niaupdater"
-
 
 ###############################################################################
 # NIA Installer
@@ -155,19 +132,35 @@ if($RMMPlatform -eq "NinjaOne"){
 }
 # Cycle through updating drivers if required
 if($update_amd -eq $true){ 
-    Set-DriverUpdatesamd  
+    Set-DriverUpdatesamd
+    if($Script:installstatus -ne "Updated"){
+        Set-Toast -Toasttitle "Driver Check" -Toasttext "No new AMD drivers found" -UniqueIdentifier "nonew" -Toastenable $notifications
+    }
 }
 if($update_nvidia -eq $true){
     Set-DriverUpdatesNvidia
+    if($Script:installstatus -ne "Updated"){
+        Set-Toast -Toasttitle "Driver Check" -Toasttext "No new Nvidia drivers found" -UniqueIdentifier "nonew" -Toastenable $notifications
+    }
 }
 if($update_intel -eq $true){
-    Set-DriverUpdatesintel 
+    Set-DriverUpdatesintel
+    if($Script:installstatus -ne "Updated"){
+        Set-Toast -Toasttitle "Driver Check" -Toasttext "No new Intel drivers found" -UniqueIdentifier "nonew" -Toastenable $notifications
+    } 
 }
 $gpuInfo
 # Restart machine if required
 if($restartAfterUpdating -eq $true -and $Script:installstatus -eq "Updated"){
     shutdown /r /t 30 /c "In 30 seconds, the computer will be restarted to finish installing GPU Drivers"
+    RMM-Exit 0
 }
+
+if($restartAfterUpdating -eq $false -and $Script:installstatus -eq "Updated"){
+    Set-Toast -Toasttitle "Updating Drivers" -Toasttext "Finished installing drivers please reboot" -UniqueIdentifier "default" -Toastreboot -Toastenable $notifications
+    RMM-Exit 0
+}
+
 RMM-Exit 0
 
 ###############################################################################
