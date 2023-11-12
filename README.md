@@ -82,7 +82,7 @@ NinjaRMM Custom Field Requirements inlcuding permissions
 .\Invoke-niaupdater.ps1
 ```
 
-run as system context using RMM
+Run as system context using RMM
 
 Copy paste all code in invoke script directly into RMM script with relevaly script variables
 

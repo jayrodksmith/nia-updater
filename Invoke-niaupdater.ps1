@@ -7,7 +7,7 @@ param (
         [string]$update_intel = $env:updateintelDrivers,
         [string]$restartAfterUpdating = $env:restartAfterUpdating,
         [ValidateSet('NinjaOne', 'Standalone')]
-        [string]$RMMPlatform = "Standalone",
+        [string]$RMMPlatform = "NinjaOne",
         # Currently not implemented
         [bool]$notifications = $true,
         [bool]$autoupdate = $true
@@ -20,14 +20,22 @@ function Test-Administrator {
     (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)  
 }
 if(Test-Administrator -eq $true){
-    Write-Debug "Running As Admin"}
+    Write-Debug "niaupdater running as admin"}
     else{
-    Write-Warning "Not running as Admin, run this script elevated or as System Context"
+    Write-Warning "NIAupdater not running as Admin, run this script elevated or as System Context"
     exit 0
 }
+
 # If ran outside of NinjaRMM automation, will set to check and print driver info by default.
 # With no logging to ninja and no updating
 
+# Check if ninjarmm exists if rmmplatform set
+$ninjarmmcli = "C:\ProgramData\NinjaRMMAgent\ninjarmm-cli.exe"
+$ninjarmminstalled = (Test-Path -Path $ninjarmmcli)
+if($RMMPlatform -eq "NinjaOne" -and $ninjarmminstalled -eq $false){
+    Write-Warning "NinjaOne not installed, defaulting to Standalone"
+    $RMMPlatform = 'Standalone'
+}
 if(!$update_nvidia){$update_nvidia = $false}
 if(!$update_amd) {$update_amd = $false}
 if(!$update_intel) {$update_intel = $false}
@@ -41,7 +49,6 @@ $Script:niaupdaterPath = (Join-Path -Path $ENV:ProgramData -ChildPath "niaupdate
 $Script:logfilelocation = "$niaupdaterPath\logs"
 $Script:logfile = "$Script:logfilelocation\niaupdater.log"
 $Script:logdescription = "niaupdater"
-
 
 ###############################################################################
 # NIA Installer
