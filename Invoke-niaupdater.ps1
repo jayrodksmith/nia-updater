@@ -10,9 +10,9 @@ param (
         [ValidateSet('NinjaOne', 'Standalone')]
         [string]$RMMPlatform = "NinjaOne",
         [bool]$notifications = $true,
-        [bool]$autoupdate = $true
+        [bool]$autoupdate = $true,
         [ValidateSet('Studio', 'Game')]
-        [string]$geforcedriver = "Studio",
+        [string]$geforcedriver = "Studio"
         )
 ###############################################################################
 # Pre Checks
