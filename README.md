@@ -1,12 +1,15 @@
 # nia-updater (Nvidia Intel Amd Updater)
 Checks for a current and new versions of the NVIDIA Intel and AMD gpu drivers
+
 Stores values into an array for use to import into RMM
 
 Nvida drivers use studio drivers (not game drivers)
 
 # External Modules and Programs Used
 [BurntToast](https://github.com/Windos/BurntToast)
+
 [RunAsUser](https://github.com/KelvinTegelaar/RunAsUser)
+
 [7zip](https://www.7-zip.org/download.html)
 
 # Current Bugs
@@ -45,6 +48,7 @@ Other
 
 # Requirements
 Script has been designed to run as "System Context"
+
 Can be run as Administrator however advised to run as system context
 
 NinjaRMM Script Variable Requirements
@@ -79,6 +83,7 @@ NinjaRMM Custom Field Requirements inlcuding permissions
 ```
 
 run as system context using RMM
+
 Copy paste all code in invoke script directly into RMM script with relevaly script variables
 
 # Function Descriptions
