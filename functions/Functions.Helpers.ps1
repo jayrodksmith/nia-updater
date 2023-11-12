@@ -30,6 +30,7 @@ function Get-DownloadUrls {
                 Start-sleep -Seconds 5
                 RMM-Error "Error occurred while downloading: $($_.Exception.Message)" -messagetype Verbose
                 RMM-Error "$url" -messagetype Verbose
+                Set-Toast -Toasttitle "Download Error" -Toasttext "Error occurred : $($_.Exception.Message)" -UniqueIdentifier "default" -Toastenable $notifications
                 $global:downloadError = $true
                 RMM-Exit "1"
             }

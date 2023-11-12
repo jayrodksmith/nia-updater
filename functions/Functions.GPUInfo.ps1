@@ -140,7 +140,17 @@ function Get-GPUInfo {
             }
         }
     }
-    Set-Toast -Toasttitle "Driver Check" -Toasttext "Finished Checking for GPU drivers" -UniqueIdentifier "default" -Toastenable $notifications
+    foreach ($gpu in $gpuinfo) {
+        if ($gpu.DriverUptoDate -eq $false) {
+            Set-Toast -Toasttitle "$($gpu.brand) Drivers Found" -Toasttext "Latest : $($gpu.DriverLatest) Installed : $($gpu.DriverInstalled)" -UniqueIdentifier "$($gpu.brand)" -Toastenable $notifications
+            $outOfDateFound = $true
+        }
+    }
+    if (!$outOfDateFound) {
+        Set-Toast -Toasttitle "Driver Check" -Toasttext "No new drivers found" -UniqueIdentifier "default" -Toastenable $notifications
+    }
+    
+    
     return $gpuInfo
 }
 ###############################################################################
