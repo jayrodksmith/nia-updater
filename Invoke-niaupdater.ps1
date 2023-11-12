@@ -6,7 +6,7 @@ param (
         [string]$update_amd = $env:updateamdDrivers,
         [string]$update_intel = $env:updateintelDrivers,
         [string]$restartAfterUpdating = $env:restartAfterUpdating,
-        [bool]$silentmode = $env:silentmode,
+        [string]$silentmode = $env:silentmode,
         [ValidateSet('NinjaOne', 'Standalone')]
         [string]$RMMPlatform = "NinjaOne",
         [bool]$notifications = $true,
