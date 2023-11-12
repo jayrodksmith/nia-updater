@@ -6,11 +6,13 @@ param (
         [string]$update_amd = $env:updateamdDrivers,
         [string]$update_intel = $env:updateintelDrivers,
         [string]$restartAfterUpdating = $env:restartAfterUpdating,
+        [bool]$silentmode = $env:silentmode,
         [ValidateSet('NinjaOne', 'Standalone')]
         [string]$RMMPlatform = "NinjaOne",
-        # Currently not implemented
         [bool]$notifications = $true,
         [bool]$autoupdate = $true
+        [ValidateSet('Studio', 'Game')]
+        [string]$geforcedriver = "Studio",
         )
 ###############################################################################
 # Pre Checks
@@ -40,6 +42,7 @@ if(!$update_nvidia){$update_nvidia = $false}
 if(!$update_amd) {$update_amd = $false}
 if(!$update_intel) {$update_intel = $false}
 if(!$restartAfterUpdating) {$restartAfterUpdating = $false}
+if($silentmode -eq 'true'){$notifications = $false}
 
 ###############################################################################
 # Global Variable Setting
@@ -49,6 +52,7 @@ $Script:niaupdaterPath = (Join-Path -Path $ENV:ProgramData -ChildPath "niaupdate
 $Script:logfilelocation = "$niaupdaterPath\logs"
 $Script:logfile = "$Script:logfilelocation\niaupdater.log"
 $Script:logdescription = "niaupdater"
+$Script:geforcedriver = $geforcedriver
 
 ###############################################################################
 # NIA Installer

@@ -31,7 +31,6 @@ Intel
 # Future Features
 Nvidia
     
-    Select between studio and game drivers
 
 AMD
 
@@ -44,7 +43,7 @@ Intel
 Other
 
     More notifications for steps applied
-    Cleanup invoke script to be more generic to allow updates without modify invoke
+    Cleanup invoke script to be more generic to allow updates without modifying invoke
 
 # Requirements
 Script has been designed to run as "System Context"
