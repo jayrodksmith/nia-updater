@@ -142,7 +142,7 @@ function Get-GPUInfo {
     }
     foreach ($gpu in $gpuinfo) {
         if ($gpu.DriverUptoDate -eq $false) {
-            Set-Toast -Toasttitle "$($gpu.brand) Drivers Found" -Toasttext "Latest : $($gpu.DriverLatest) Installed : $($gpu.DriverInstalled)" -UniqueIdentifier "$($gpu.brand)" -Toastenable $notifications
+            Set-Toast -Toasttitle "$($gpu.brand) Drivers Found" -Toasttext "Latest : $($gpu.DriverLatest) Installed : $($gpu.DriverInstalled)" -UniqueIdentifier "default" -Toastenable $notifications
             $outOfDateFound = $true
         }
     }
