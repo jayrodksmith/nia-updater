@@ -59,7 +59,6 @@ function Set-DriverUpdatesNvidia {
     $Script:installstatus = "Updated"
     return
 }
-
 ###############################################################################
 # Function - Nvidia Driver Installer End
 ###############################################################################
