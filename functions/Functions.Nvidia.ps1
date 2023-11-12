@@ -86,12 +86,17 @@ function Get-driverlatestversionnvidia {
         $windowsArchitecture = if ([Environment]::Is64BitOperatingSystem){"64bit"}else{"32bit"}
         $cardtype = "/"
         $drivername1 = "desktop"
-        $drivername2 = "nsd-dch"
         $psid = "101"
         $pfid = "816"
         ## Check if Studio or Beta set
-        if ($Script:geforcedriver -eq 'Studio'){$whql = "4"}
-        if ($Script:geforcedriver -eq 'Game'){$whql = "1"}
+        if ($Script:geforcedriver -eq 'Studio'){
+            $whql = "4"
+            $drivername2 = "nsd-dch"
+        }
+        if ($Script:geforcedriver -eq 'Game'){
+            $whql = "1"
+            $drivername2 = "dch"
+        }
     }   
     # Checking latest driver version from Nvidia website
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
