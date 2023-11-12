@@ -11,12 +11,17 @@ Nvida drivers use studio drivers (not game drivers)
 
 # Current Bugs
 AMD
+    
     Driver Check        Some minor timeout issues to amd website checking version          
     Driver Install      None reported
+
 Nvidia
+    
     Driver Check        None reported
     Driver Install      None reported
+
 Intel
+    
     Driver Check        Certain generations are not checked properly
     Driver Install      Not fully tested
 
@@ -71,26 +76,26 @@ run as system context using RMM
 Copy paste all code in invoke script directly into RMM script with relevaly script variables
 
 # Function Descriptions
-Functions.Nvidia.ps1
+    Functions.Nvidia.ps1
     All nvidia related functions
 
-Functions.Amd.ps1
+    Functions.Amd.ps1
     All amd related functions
 
-Functions.Intel.ps1
+    Functions.Intel.ps1
     All Intel related functions
 
-Functions.GPUInfo.ps1
+    Functions.GPUInfo.ps1
     All code to retrieve infomation on GPUs
 
-Functions.Notifications.ps1
+    Functions.Notifications.ps1
     All code related to Toast notifications
 
-Functions.NinjaOne.ps1
+    Functions.NinjaOne.ps1
     All code related to ninjaon integration
 
-Functions.Logging.ps1
+    Functions.Logging.ps1
     All code related to custom logging
 
-Functions.Helpers.ps1
+    Functions.Helpers.ps1
     All other code
