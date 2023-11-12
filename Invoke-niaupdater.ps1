@@ -1,34 +1,4 @@
 <#
-Set-DriverUpdatesNvidia
-    Used to install nvidia drivers
-    ( Should be fairly robust)
-
-Set-DriverUpdatesamd
-    Used to install amd drivers
-    ( Currently working , but needs more testing)
-
-Set-DriverUpdatesIntel
-    Used to install intel drivers
-    ( Currently working for Intel Gen 11 +)
-
-Set-GPUtoNinjaRMM 
-    Used to log details to NinjaRMM
-        All NinjaRMM custom fields below
-            hardwarediscretegpu                 (text)
-            hardwarediscretedriverinstalled     (text)
-            hardwarediscretedriverlatest        (text)
-            hardwarediscretedriveruptodate      (checkbox)
-        
-            hardwareintegratedgpu               (text)
-            hardwareintegrateddriverinstalled   (text)
-            hardwareintegrateddriverlatest      (text)
-            hardwareintegrateddriveruptodate    (checkbox)
-
-NinjaRMM requirements -----------------
-            updateNvidiaDrivers                 (Script Variable Checkbox)
-            updateamdDrivers                    (Script Variable Checkbox)
-            updateintelDrivers                  (Script Variable Checkbox)
-            restartAfterUpdating                (Script Variable Checkbox)(Default unticked)
 #>
 param (
         [string]$githubrepo = "jayrodksmith/nia-updater",
