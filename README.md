@@ -27,13 +27,19 @@ Intel
 
 # Future Features
 Nvidia
+    
     Select between studio and game drivers
+
 AMD
+
     Make driver check more reliable
+
 Intel
+
     Resolve issues with generation checks
 
 Other
+
     More notifications for steps applied
     Cleanup invoke script to be more generic to allow updates without modify invoke
 
